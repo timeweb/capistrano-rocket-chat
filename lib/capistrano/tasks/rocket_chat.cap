@@ -1,21 +1,41 @@
 require 'httparty'
 
-before 'deploy:starting', 'rocket_chat_notify:starting'
-before 'deploy:failed', 'rocket_chat_notify:failed'
-before 'deploy:finished', 'rocket_chat_notify:finished'
+before 'deploy:updating', 'rocket_chat_notify:updating'
+before 'deploy:reverting', 'rocket_chat_notify:reverting'
+after 'deploy:finishing', 'rocket_chat_notify:updated'
+after 'deploy:finishing_rollback', 'rocket_chat_notify:reverted'
+after 'deploy:failed', 'rocket_chat_notify:failed'
 
 namespace :rocket_chat_notify do
-  desc 'Notify rocket-chat on start of deployment'
-  task :starting do |task|
+  desc 'Notify rocket-chat on start of updating'
+  task :updating do |task|
     on roles(:all) do |host|
-      notify(:starting)
+      notify(:updating)
     end
   end
-  task :finished do |task|
+
+  desc 'Notify rocket-chat on start of rollback'
+  task :reverting do |task|
     on roles(:all) do |host|
-      notify(:finished)
+      notify(:reverting)
     end
   end
+  
+  desc 'Notify rocket-chat on finish of deployment'
+  task :updated do |task|
+    on roles(:all) do |host|
+      notify(:updated)
+    end
+  end  
+  
+  desc 'Notify rocket-chat on finish of rollback'
+  task :reverted do |task|
+    on roles(:all) do |host|
+      notify(:reverted)
+    end
+  end  
+  
+  desc 'Notify rocket-chat on fail of deployment'
   task :failed do |task|
     on roles(:all) do |host|
       notify(:failed)
